@@ -17,9 +17,8 @@ public class ImageProcessor{
                 let index = y * _image.width + x
                 
                 let pixel = _image.pixels[index]
-                let modifiedPixel = filter.apply(pixel)
-                _image.pixels[index] = modifiedPixel
-                print("pixeldif \(pixel.value - modifiedPixel.value), pixeladd \(pixel.value/2 + modifiedPixel.value/2)")
+                _image.pixels[index] = filter.apply(pixel)
+//                print("pixeldif \(pixel.value - modifiedPixel.value), pixeladd \(pixel.value/2 + modifiedPixel.value/2)")
             }
         }
         
