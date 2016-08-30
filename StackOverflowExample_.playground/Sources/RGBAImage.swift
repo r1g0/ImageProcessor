@@ -46,6 +46,7 @@ public struct RGBAImage {
     
     public var width: Int
     public var height: Int
+    public var scale: CGFloat
     
     public init?(image: UIImage) {
         guard let cgImage = image.CGImage else { return nil }
@@ -56,14 +57,18 @@ public struct RGBAImage {
         var bitmapInfo: UInt32 = CGBitmapInfo.ByteOrder32Big.rawValue
         bitmapInfo |= CGImageAlphaInfo.PremultipliedLast.rawValue & CGBitmapInfo.AlphaInfoMask.rawValue
         
-        width = Int(image.size.width)
-        height = Int(image.size.height)
+        scale = image.scale
+        width = Int(image.size.width * scale)
+        height = Int(image.size.height * scale)
         let bytesPerRow = width * 4
         
         let imageData = UnsafeMutablePointer<Pixel>.alloc(width * height)
         
         guard let imageContext = CGBitmapContextCreate(imageData, width, height, 8, bytesPerRow, colorSpace, bitmapInfo) else { return nil }
-        CGContextDrawImage(imageContext, CGRect(origin: CGPointZero, size: image.size), cgImage)
+        CGContextScaleCTM(imageContext, scale, scale);
+        let rect = CGRect(origin: CGPointZero, size: image.size)
+        CGContextClearRect(imageContext, rect)
+        CGContextDrawImage(imageContext, rect, cgImage)
         
         pixels = UnsafeMutableBufferPointer<Pixel>(start: imageData, count: width * height)
     }
@@ -78,7 +83,7 @@ public struct RGBAImage {
         let imageContext = CGBitmapContextCreateWithData(pixels.baseAddress, width, height, 8, bytesPerRow, colorSpace, bitmapInfo, nil, nil)
         
         guard let cgImage = CGBitmapContextCreateImage(imageContext) else {return nil}
-        let image = UIImage(CGImage: cgImage)
+        let image = UIImage(CGImage: cgImage, scale: scale, orientation: UIImageOrientation.Up)
         
         return image
     }
